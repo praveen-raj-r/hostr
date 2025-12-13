@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# HOSTR  
+### AI-Powered Event Management Platform
 
-## Getting Started
+🔗 **Live Demo:** https://hostr-ai.vercel.app/
 
-First, run the development server:
+HOSTR is a **full-stack AI-powered event management platform** that enables users to create, manage, promote, and run events end-to-end — from a **single AI prompt** to **QR-based ticketing and check-ins**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+This project is built to demonstrate **real-world product thinking**, **scalable frontend architecture**, and **production-ready full-stack engineering skills**.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🚀 Why HOSTR?
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Traditional event platforms are:
+- Time-consuming to set up  
+- Fragmented across tools  
+- Not optimized for creators and communities  
 
-## Learn More
+**HOSTR simplifies the entire lifecycle of an event using AI + modern UX + full-stack engineering.**
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ✨ Core Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🤖 AI Event Creation
+- Generate event title, description, and category from a single prompt
+- Prompt validation and structured output
+- Reduces event setup time from minutes to seconds
 
-## Deploy on Vercel
+### 🎨 Event Branding
+- Event cover images via Unsplash API
+- Clean, responsive UI built with Shadcn UI
+- Theme-ready architecture
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 👤 User Onboarding & Personalization
+- Interest-based onboarding flow
+- Location selection for personalized recommendations
+- Tailored explore feed
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 🔍 Explore & Discovery
+- Featured events carousel
+- Location-aware local events
+- Category-based browsing
+- Global search and routing
+
+### 📄 Event Details & Registration
+- SEO-friendly event pages
+- Smooth registration flow
+- Secure ticket generation
+
+### 🎟️ QR-Coded Tickets
+- Unique QR ticket per attendee
+- “My Tickets” dashboard
+- Persistent access across sessions
+
+### 📊 Organizer Dashboard
+- Real-time analytics:
+  - Registrations
+  - Attendance
+  - Engagement
+- Organizer-focused insights
+
+### 📱 QR Scanner Check-In
+- Built-in QR scanner for instant venue check-ins
+- Real-time attendance tracking
+
+### 💳 Subscription Model
+- Free tier: 1 event
+- **HOSTR Pro**: unlimited events and premium features
+
+---
+
+## 🧠 What This Project Demonstrates
+
+### Frontend Engineering
+- Next.js App Router
+- Server & Client Components
+- Complex form handling and validation
+- Responsive, accessible UI
+- Scalable component architecture
+- State and loading management
+
+### Backend & Full-Stack
+- API design and data modeling
+- Authentication and protected routes
+- Role-based access control
+- Subscription gating
+- QR code generation and validation
+
+### Product Thinking
+- Clear user journeys (organizer vs attendee)
+- Onboarding → activation → retention flow
+- Monetization logic
+- Analytics-driven dashboards
+
+### Engineering Practices
+- Clean folder structure
+- Reusable components and hooks
+- Production deployment on Vercel
+
+---
+
+## 🛠 Tech Stack
+
+**Frontend**
+- Next.js
+- React
+- TypeScript
+- Shadcn UI
+- Tailwind CSS
+
+**Backend / Services**
+- Convex
+- Clerk
+- Unsplash API
+- QR code generation & scanning
+
+**Deployment**
+- Vercel
+
+---
+
+## 📁 Project Structure
+
