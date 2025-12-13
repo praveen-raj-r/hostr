@@ -121,4 +121,39 @@ Traditional event platforms are:
 ---
 
 ## 📁 Project Structure
+app/
+├─ auth/ # Authentication routes (login, onboarding, protected access)
+├─ events/ # Event creation, listing, and detail pages
+├─ dashboard/ # Organizer dashboard (analytics, management)
+├─ tickets/ # Attendee tickets and QR access
+├─ layout.tsx # Root layout
+├─ page.tsx # Landing / home
+---
+
+## 🔮 Future Enhancements
+
+- Team-based organizers
+- Event reminders & notifications
+- Advanced analytics
+- Theme marketplace
+- Organizer payouts
+
+---
+
+## 🧑‍💻 Author
+
+**Praveen**  
+Frontend Engineer | Full-Stack Projects
+
+---
+
+## ⭐ Why This Repo Matters
+
+This is **not a tutorial project**.
+
+HOSTR demonstrates:
+- Real product decision-making
+- Scalable architecture
+- UX + engineering balance
+- Ownership mindset
 
