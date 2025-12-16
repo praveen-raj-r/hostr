@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import  { useState } from "react";
 import Link from "next/link";
 import { Building, Crown, Plus, Ticket } from "lucide-react";
 import { SignInButton, useAuth, UserButton } from "@clerk/nextjs";
@@ -11,9 +11,9 @@ import { useOnboarding } from "@/hooks/use-onboarding";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import UpgradeModal from "./upgrade-modal";
-import { Badge } from "./ui/badge";
-import OnboardingModal from "./onboarding-modal";
+import { Badge } from "@/components/badge";
 import SearchLocationBar from "@/components/search-location-bar";
+import OnboardingModal from "./onboarding-modal";
 
 export default function Header() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -32,14 +32,14 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/spott.png"
-              alt="Spott logo"
+              src="/hostr.png"
+              alt="Hostr logo"
               width={500}
               height={500}
               className="w-full h-11"
               priority
             />
-            {/* <span className="text-purple-500 text-2xl font-bold">spott*</span> */}
+            {/* <span className="text-purple-500 text-2xl font-bold">hostr*</span> */}
             {hasPro && (
               <Badge className="bg-linear-to-r from-pink-500 to-orange-500 gap-1 text-white ml-3">
                 <Crown className="w-3 h-3" />

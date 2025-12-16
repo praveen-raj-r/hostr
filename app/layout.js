@@ -6,8 +6,9 @@ import { ConvexClientProvider } from "../components/convex-client-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata = {
-  title: "Spott",
-  description: "Discover and create amazing events",
+  title: "Hostr – AI Event Management Platform",
+  description:
+    "Hostr is a full-stack AI-powered event management platform to create, discover, and manage events with real-time analytics and QR-based ticketing.",
 };
 
 export default function RootLayout({ children }) {

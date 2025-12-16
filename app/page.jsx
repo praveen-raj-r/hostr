@@ -11,7 +11,7 @@ export default function Home() {
           <div className="text-center sm:text-left">
             <div className="mb-6">
               <span className="text-gray-500 font-light tracking-wide">
-                spott<span className="text-purple-400">*</span>
+                hostr<span className="text-purple-400">*</span>
               </span>
             </div>
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold mb-6 leading-[0.95] tracking-tight">
@@ -23,7 +23,7 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-gray-400 mb-12 max-w-lg font-light">
-              Whether you&apos;re hosting or attending, Spott makes every event
+              Whether you&apos;re hosting or attending, Hostr makes every event
               memorable. Join our community today.
             </p>
 
