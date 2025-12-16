@@ -11,7 +11,7 @@ import { useOnboarding } from "@/hooks/use-onboarding";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import UpgradeModal from "./upgrade-modal";
-import { Badge } from "@/components/badge";
+import { Badge } from "@/components/ui/badge";
 import SearchLocationBar from "@/components/search-location-bar";
 import OnboardingModal from "./onboarding-modal";
 
