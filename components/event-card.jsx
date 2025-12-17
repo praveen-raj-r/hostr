@@ -166,9 +166,9 @@ export default function EventCard({
                 }}
               >
                 {action === "event" ? (
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="size-4" />
                 ) : (
-                  <X className="w-4 h-4" />
+                  <X className="size-4" />
                 )}
               </Button>
             )}

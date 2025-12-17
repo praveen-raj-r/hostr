@@ -1,6 +1,6 @@
 "use client";
 
-import  { useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Building, Crown, Plus, Ticket } from "lucide-react";
 import { SignInButton, useAuth, UserButton } from "@clerk/nextjs";
@@ -39,7 +39,7 @@ export default function Header() {
               className="w-full h-11"
               priority
             />
-            {/* <span className="text-purple-500 text-2xl font-bold">hostr*</span> */}
+
             {hasPro && (
               <Badge className="bg-linear-to-r from-pink-500 to-orange-500 gap-1 text-white ml-3">
                 <Crown className="w-3 h-3" />

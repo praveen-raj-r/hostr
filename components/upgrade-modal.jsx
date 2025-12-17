@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PricingTable } from "@clerk/nextjs";
+import { ScrollArea } from "./ui/scroll-area";
 
 export default function UpgradeModal({ isOpen, onClose, trigger = "limit" }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl max-h-screen">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-6 h-6 text-purple-500" />
@@ -27,19 +28,20 @@ export default function UpgradeModal({ isOpen, onClose, trigger = "limit" }) {
             Unlock unlimited events and premium features!
           </DialogDescription>
         </DialogHeader>
-
-        {/* Pricing Cards */}
-        <PricingTable
-          checkoutProps={{
-            appearance: {
-              elements: {
-                drawerRoot: {
-                  zIndex: 2000,
+        <ScrollArea className="h-[calc(100vh-250px)]">
+          {/* Pricing Cards */}
+          <PricingTable
+            checkoutProps={{
+              appearance: {
+                elements: {
+                  drawerRoot: {
+                    zIndex: 2000,
+                  },
                 },
               },
-            },
-          }}
-        />
+            }}
+          />
+        </ScrollArea>
 
         {/* Footer */}
         <div className="flex gap-3">

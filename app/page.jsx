@@ -4,67 +4,44 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div>
-      <section className="pb-16 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
-          {/* left */}
-          <div className="text-center sm:text-left">
-            <div className="mb-6">
-              <span className="text-gray-500 font-light tracking-wide">
-                hostr<span className="text-purple-400">*</span>
-              </span>
-            </div>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold mb-6 leading-[0.95] tracking-tight">
-              Discover &<br />
-              create amazing
-              <br />
-              <span className="bg-linear-to-r from-blue-400 via-purple-400 to-orange-400 bg-clip-text text-transparent">
-                events.
-              </span>
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-400 mb-12 max-w-lg font-light">
-              Whether you&apos;re hosting or attending, Hostr makes every event
-              memorable. Join our community today.
-            </p>
+    <section className="relative overflow-hidden pb-24">
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center relative z-10 px-6">
+        {/* LEFT */}
+        <div className="text-center lg:text-left">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold leading-[0.95] tracking-tight mb-6">
+            Discover & <br />
+            create{" "}
+            <span className="bg-linear-to-r from-blue-400 via-purple-400 to-orange-400 bg-clip-text text-transparent">
+              amazing events
+            </span>
+          </h1>
 
+          <p className="text-lg sm:text-xl text-gray-400 max-w-xl mb-10 font-light">
+            From local meetups to large-scale experiences — Hostr helps you
+            create, explore, and manage events effortlessly.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
             <Link href="/explore">
-              <Button size="xl" className="rounded-full">
-                Get Started
+              <Button size="xl" className="rounded-full px-8">
+                Get started
               </Button>
             </Link>
           </div>
-          {/* right */}
-          <div className="relative block">
-            <Image
-              src="/hero.png"
-              // src="/hero.gif"
-              alt="react meetup"
-              width={700}
-              height={700}
-              className="w-full h-auto"
-              priority
-            />
-            {/* <video
-              width="100%"
-              height="100%"
-              loop
-              playsInline
-              autoPlay
-              muted
-              className="w-full h-auto"
-            >
-              <source
-                src="https://cdn.lu.ma/landing/phone-dark.mp4"
-                type="video/mp4;codecs=hvc1"
-              />
-              <source
-                src="https://cdn.lu.ma/landing/phone-dark.webm"
-                type="video/webm"
-              />
-            </video> */}
-          </div>
         </div>
-      </section>
-    </div>
+
+        {/* RIGHT */}
+        <div className="relative ml-auto">
+          <Image
+            src="/hero.png"
+            alt="People attending a tech meetup"
+            width={400}
+            height={400}
+            priority
+            className="select-none"
+          />
+        </div>
+      </div>
+    </section>
   );
 }
