@@ -5,6 +5,7 @@ import Footer from "@/components/footer";
 import { ConvexClientProvider } from "../components/convex-client-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import { dark } from "@clerk/themes";
 
 export const metadata = {
   title: "Hostr - AI Event Management Platform",
@@ -14,7 +15,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        theme: dark,
+      }}
+    >
       <html lang="en" suppressHydrationWarning>
         <body className="bg-linear-to-br from-gray-950 via-zinc-900 to-stone-900 text-white">
           <ThemeProvider

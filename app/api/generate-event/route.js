@@ -58,9 +58,7 @@ Rules:
     } else if (cleanedText.startsWith("```")) {
       cleanedText = cleanedText.replace(/```\n?/g, "");
     }
-
-    console.log(cleanedText);
-
+ 
     let eventData;
     try {
       eventData = JSON.parse(cleanedText);

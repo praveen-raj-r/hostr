@@ -16,6 +16,7 @@ import {
   ExternalLink,
   Loader2,
   CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { useConvexQuery } from "@/hooks/use-convex-query";
 import { api } from "@/convex/_generated/api";
@@ -99,6 +100,8 @@ export default function EventDetailPage() {
   const isEventFull = event.registrationCount >= event.capacity;
   const isEventPast = event.endDate < Date.now();
   const isOrganizer = user?.id === event.organizerId;
+  const isRegistrationCancelled = registration?.status === "cancelled";
+  const isRegistrationConfirmed = registration?.status === "confirmed";
 
   return (
     <div
@@ -256,9 +259,7 @@ export default function EventDetailPage() {
                     </p>
                   )}
                 </div>
-
                 <Separator />
-
                 {/* Stats */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -291,11 +292,25 @@ export default function EventDetailPage() {
                     </p>
                   </div>
                 </div>
-
                 <Separator />
-
                 {/* Registration Button */}
-                {registration ? (
+                {isRegistrationCancelled ? (
+                  <div className="space-y-2">
+                    <Button
+                      variant="destructive"
+                      className="w-full gap-2"
+                      disabled
+                    >
+                      <XCircle className="w-4 h-4" />
+                      Registration Cancelled
+                    </Button>
+
+                    <p className="text-xs text-muted-foreground text-center">
+                      You cancelled this registration. Re-registration is not
+                      allowed.
+                    </p>
+                  </div>
+                ) : isRegistrationConfirmed ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg">
                       <CheckCircle className="w-5 h-5" />
@@ -332,7 +347,6 @@ export default function EventDetailPage() {
                     Register for Event
                   </Button>
                 )}
-
                 {/* Share Button */}
                 <Button
                   variant="outline"

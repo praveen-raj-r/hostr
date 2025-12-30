@@ -90,7 +90,7 @@ export default function ExplorePage() {
     <>
       {/* Hero Title */}
       <div className="pb-12 text-center">
-        <h1 className="text-5xl md:text-6xl font-bold mb-4">Discover Events</h1>
+        <h1 className="text-4xl md:text-6xl font-bold mb-4">Discover Events</h1>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
           Explore featured events, find what&apos;s happening locally, or browse
           events across India
@@ -132,13 +132,13 @@ export default function ExplorePage() {
                       <Badge className="w-fit mb-4" variant="secondary">
                         {event.city}, {event.state || event.country}
                       </Badge>
-                      <h2 className="text-3xl md:text-5xl font-bold mb-3 text-white">
+                      <h2 className="text-xl sm:text-3xl md:text-5xl font-bold mb-3 text-white">
                         {event.title}
                       </h2>
-                      <p className="text-lg text-white/90 mb-4 max-w-2xl line-clamp-2">
+                      <p className="text-base sm:text-lg text-white/90 mb-4 max-w-2xl line-clamp-2">
                         {event.description}
                       </p>
-                      <div className="flex items-center gap-4 text-white/80">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-white/80">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4" />
                           <span className="text-sm">
@@ -200,25 +200,36 @@ export default function ExplorePage() {
       )}
 
       {/* Browse by Category */}
-      <div className="mb-16">
-        <h2 className="text-3xl font-bold mb-6">Browse by Category</h2>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+      <div className="mb-20">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-8 tracking-tight">
+          Browse by Category
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {categoriesWithCounts.map((category) => (
             <Card
               key={category.id}
-              className="py-2 group cursor-pointer hover:shadow-lg transition-all hover:border-purple-500/50"
               onClick={() => handleCategoryClick(category.id)}
+              className="p-0 bg-linear-to-br from-background to-muted/30 group cursor-pointer rounded-xl border border-border/60 bg-background transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-purple-500/50 active:scale-[0.98]"
             >
-              <CardContent className="px-3 sm:p-6 flex items-center gap-3">
-                <div className="text-3xl sm:text-4xl">{category.icon}</div>
+              <CardContent className="p-4 sm:p-6 flex items-center gap-4">
+                {/* Icon */}
+                <div className="flex items-center justify-center size-12 sm:h-14 sm:w-14 rounded-lg bg-purple-500/10 text-2xl sm:text-3xl group-hover:bg-purple-500/20 transition-colors">
+                  {category.icon}
+                </div>
+
+                {/* Text */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold mb-1 group-hover:text-purple-400 transition-colors">
+                  <h3 className="text-sm sm:text-base font-semibold truncate group-hover:text-purple-400 transition-colors">
                     {category.label}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {category.count} Event{category.count !== 1 ? "s" : ""}
-                  </p>
+
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="text-xs sm:text-sm text-muted-foreground">
+                      {category.count} Event{category.count !== 1 ? "s" : ""}
+                    </span>
+                  </div>
                 </div>
               </CardContent>
             </Card>

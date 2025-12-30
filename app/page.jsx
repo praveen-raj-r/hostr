@@ -4,11 +4,11 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <section className="relative overflow-hidden pb-24">
+    <section className="relative overflow-hidden">
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center relative z-10 px-6">
         {/* LEFT */}
         <div className="text-center lg:text-left">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold leading-[0.95] tracking-tight mb-6">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold leading-[0.95] tracking-tight mb-6">
             Discover & <br />
             create{" "}
             <span className="bg-linear-to-r from-blue-400 via-purple-400 to-orange-400 bg-clip-text text-transparent">
@@ -31,7 +31,7 @@ export default function Home() {
         </div>
 
         {/* RIGHT */}
-        <div className="relative ml-auto">
+        <div className="relative lg:ml-auto mx-auto pb-10">
           <Image
             src="/hero.png"
             alt="People attending a tech meetup"

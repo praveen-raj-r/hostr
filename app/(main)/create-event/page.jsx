@@ -156,9 +156,7 @@ export default function CreateEventPage() {
     return d;
   };
 
-  const onSubmit = async (data) => {
-    console.log(data);
-
+  const onSubmit = async (data) => {  
     try {
       const start = combineDateTime(data.startDate, data.startTime);
       const end = combineDateTime(data.endDate, data.endTime);

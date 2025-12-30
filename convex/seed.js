@@ -704,8 +704,7 @@ export const run = internalMutation({
       const eventId = await ctx.db.insert("events", event);
       createdEvents.push(eventData.title);
     }
-
-    console.log(`✅ Successfully seeded ${createdEvents.length} events!`);
+ 
     return {
       success: true,
       count: createdEvents.length,
@@ -733,8 +732,7 @@ export const clear = internalMutation({
       await ctx.db.delete(event._id);
       count++;
     }
-
-    console.log(`🗑️ Cleared ${count} events`);
+ 
     return { success: true, deleted: count };
   },
 });
