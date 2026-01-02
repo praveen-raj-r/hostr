@@ -55,16 +55,18 @@ const eventSchema = z
     startTime: z.string().regex(timeRegex, "Start time must be HH:MM"),
     endTime: z.string().regex(timeRegex, "End time must be HH:MM"),
     locationType: z.enum(["physical", "online"]).default("physical"),
+    state: z.string().min(1, "State is required"),
+    city: z.string().min(1, "City is required"),
+
     venue: z
       .string()
-      .optional()
-      .refine((val) => !val || /^https?:\/\//.test(val), {
-        message: "Must be a valid URL",
+      .min(1, "Venue link is required")
+      .refine((val) => /^https?:\/\//.test(val), {
+        message: "Must be a valid URL (Google Maps link)",
       }),
 
-    address: z.string().optional(),
-    city: z.string().optional(),
-    state: z.string().optional(),
+    address: z.string().min(5, "Address is required"),
+
     capacity: z.number().min(1, "Capacity must be at least 1"),
     ticketType: z.enum(["free", "paid"]).default("free"),
     ticketPrice: z.number().optional(),
@@ -112,6 +114,8 @@ export default function CreateEventPage() {
       category: "",
       state: "",
       city: "",
+      venue: "",
+      address: "",
       startDate: undefined,
       endDate: undefined,
     },
@@ -156,7 +160,7 @@ export default function CreateEventPage() {
     return d;
   };
 
-  const onSubmit = async (data) => {  
+  const onSubmit = async (data) => {
     try {
       const start = combineDateTime(data.startDate, data.startTime);
       const end = combineDateTime(data.endDate, data.endTime);
@@ -278,11 +282,10 @@ export default function CreateEventPage() {
                 <button
                   key={color}
                   type="button"
-                  className={`w-10 h-10 rounded-full border-2 transition-all ${
-                    !hasPro && color !== "#1e3a8a"
+                  className={`w-10 h-10 rounded-full border-2 transition-all ${!hasPro && color !== "#1e3a8a"
                       ? "opacity-40 cursor-not-allowed"
                       : "hover:scale-110"
-                  }`}
+                    }`}
                   style={{
                     backgroundColor: color,
                     borderColor: themeColor === color ? "white" : "transparent",
@@ -334,7 +337,7 @@ export default function CreateEventPage() {
           </div>
 
           {/* Date + Time */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid sm:grid-cols-2 gap-6">
             {/* Start */}
             <div className="space-y-2">
               <Label className="text-sm">Start</Label>
@@ -437,57 +440,67 @@ export default function CreateEventPage() {
           <div className="space-y-3">
             <Label className="text-sm">Location</Label>
             <div className="grid grid-cols-2 gap-4">
-              <Controller
-                control={control}
-                name="state"
-                render={({ field }) => (
-                  <Select
-                    value={field.value}
-                    onValueChange={(val) => {
-                      field.onChange(val);
-                      setValue("city", "");
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select state" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {indianStates.map((s) => (
-                        <SelectItem key={s.isoCode} value={s.name}>
-                          {s.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-1">
+                <Controller
+                  control={control}
+                  name="state"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value}
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        setValue("city", "");
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {indianStates.map((s) => (
+                          <SelectItem key={s.isoCode} value={s.name}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.state && (
+                  <p className="text-sm text-red-400">{errors.state.message}</p>
                 )}
-              />
+              </div>
 
-              <Controller
-                control={control}
-                name="city"
-                render={({ field }) => (
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={!selectedState}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue
-                        placeholder={
-                          selectedState ? "Select city" : "Select state first"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cities.map((c) => (
-                        <SelectItem key={c.name} value={c.name}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-1">
+                <Controller
+                  control={control}
+                  name="city"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={!selectedState}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue
+                          placeholder={
+                            selectedState ? "Select city" : "Select state first"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities.map((c) => (
+                          <SelectItem key={c.name} value={c.name}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.city && (
+                  <p className="text-sm text-red-400">{errors.city.message}</p>
                 )}
-              />
+              </div>
             </div>
 
             <div className="space-y-2 mt-6">
@@ -504,8 +517,11 @@ export default function CreateEventPage() {
 
               <Input
                 {...register("address")}
-                placeholder="Full address / street / building (optional)"
+                placeholder="Full address / street / building"
               />
+              {errors.address && (
+                <p className="text-sm text-red-400">{errors.address.message}</p>
+              )}
             </div>
           </div>
 
