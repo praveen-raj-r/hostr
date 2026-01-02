@@ -12,8 +12,13 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import UpgradeModal from "./upgrade-modal";
 import { Badge } from "@/components/ui/badge";
-import SearchLocationBar from "@/components/search-location-bar";
 import OnboardingModal from "./onboarding-modal";
+import dynamic from "next/dynamic";
+
+const SearchLocationBar = dynamic(
+  () => import("@/components/search-location-bar"),
+  { ssr: false }
+);
 
 export default function Header() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -72,9 +77,9 @@ export default function Header() {
 
             <Authenticated>
               {/* Create Event Button */}
-              <Button size="sm" asChild className="flex gap-2 mr-4">
+              <Button size="sm" asChild className="sm:flex gap-2 mr-4 hidden">
                 <Link href="/create-event">
-                  <Plus className="w-4 h-4" />
+                  <Plus className="size-4" />
                   <span className="hidden sm:inline">Create Event</span>
                 </Link>
               </Button>
@@ -111,7 +116,17 @@ export default function Header() {
             </Unauthenticated>
           </div>
         </div>
-
+        <Authenticated>
+          <div className="sm:hidden block px-4 pb-4">
+            {/* Create Event Button */}
+            <Button size="sm" asChild className="flex gap-2">
+              <Link href="/create-event">
+                <Plus className="w-4 h-4" />
+                <span>Create Event</span>
+              </Link>
+            </Button>{" "}
+          </div>
+        </Authenticated>
         {/* Mobile Search & Location - Below Header */}
         <div className="md:hidden border-t px-3 py-3">
           <SearchLocationBar />
