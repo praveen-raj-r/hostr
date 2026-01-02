@@ -185,7 +185,9 @@ export default function EventDashboardPage() {
                 <span>
                   {event.locationType === "online"
                     ? "Online"
-                    : `${event.city}, ${event.state || event.country}`}
+                    : [event?.city, event?.state || event?.country]
+                        .filter(Boolean)
+                        .join(", ")}
                 </span>
               </div>
             </div>
@@ -228,80 +230,55 @@ export default function EventDashboardPage() {
         )}
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <Card className="py-0">
-            <CardContent className="p-6 flex items-center gap-3">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <Users className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">
-                  {stats.totalRegistrations}/{stats.capacity}
-                </p>
-                <p className="text-sm text-muted-foreground">Capacity</p>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <StatsCard
+            icon={Users}
+            iconColor="text-purple-600"
+            iconBg="bg-purple-100"
+            value={`${stats.totalRegistrations}/${stats.capacity}`}
+            label="Capacity"
+          />
 
-          <Card className="py-0">
-            <CardContent className="p-6 flex items-center gap-3">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.checkedInCount}</p>
-                <p className="text-sm text-muted-foreground">Checked In</p>
-              </div>
-            </CardContent>
-          </Card>
+          <StatsCard
+            icon={CheckCircle}
+            iconColor="text-green-600"
+            iconBg="bg-green-100"
+            value={stats.checkedInCount}
+            label="Checked In"
+          />
 
           {event.ticketType === "paid" ? (
-            <Card className="py-0">
-              <CardContent className="p-6 flex items-center gap-3">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">₹{stats.totalRevenue}</p>
-                  <p className="text-sm text-muted-foreground">Revenue</p>
-                </div>
-              </CardContent>
-            </Card>
+            <StatsCard
+              icon={TrendingUp}
+              iconColor="text-blue-600"
+              iconBg="bg-blue-100"
+              value={`₹${stats.totalRevenue}`}
+              label="Revenue"
+            />
           ) : (
-            <Card className="py-0">
-              <CardContent className="p-6 flex items-center gap-3">
-                <div className="p-3 bg-orange-100 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.checkInRate}%</p>
-                  <p className="text-sm text-muted-foreground">Check-in Rate</p>
-                </div>
-              </CardContent>
-            </Card>
+            <StatsCard
+              icon={TrendingUp}
+              iconColor="text-orange-600"
+              iconBg="bg-orange-100"
+              value={`${stats.checkInRate}%`}
+              label="Check-in Rate"
+            />
           )}
 
-          <Card className="py-0">
-            <CardContent className="p-6 flex items-center gap-3">
-              <div className="p-3 bg-amber-100 rounded-lg">
-                <Clock className="w-6 h-6 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">
-                  {stats.isEventPast
-                    ? "Ended"
-                    : stats.hoursUntilEvent > 24
-                      ? `${Math.floor(stats.hoursUntilEvent / 24)}d`
-                      : `${stats.hoursUntilEvent}h`}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {stats.isEventPast ? "Event Over" : "Time Left"}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <StatsCard
+            icon={Clock}
+            iconColor="text-amber-600"
+            iconBg="bg-amber-100"
+            value={
+              stats.isEventPast
+                ? "Ended"
+                : stats.hoursUntilEvent > 24
+                  ? `${Math.floor(stats.hoursUntilEvent / 24)}d`
+                  : `${stats.hoursUntilEvent}h`
+            }
+            label={stats.isEventPast ? "Event Over" : "Time Left"}
+          />
         </div>
-
         {/* Attendee Management */}
         <h2 className="text-2xl font-bold mb-4">Attendee Management</h2>
 
@@ -366,5 +343,22 @@ export default function EventDashboardPage() {
         />
       )}
     </div>
+  );
+}
+
+function StatsCard({ icon, iconColor, iconBg, value, label }) {
+  const Icon = icon;
+  return (
+    <Card className="py-0 rounded-lg">
+      <CardContent className="p-3 flex items-center gap-3">
+        <div className={`p-4 rounded-md ${iconBg}`}>
+          <Icon className={`size-6 ${iconColor}`} />
+        </div>
+        <div>
+          <p className="text-2xl font-bold">{value}</p>
+          <p className="text-sm text-muted-foreground">{label}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
