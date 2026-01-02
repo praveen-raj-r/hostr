@@ -9,16 +9,11 @@ const links = [
   },
   {
     href: "https://github.com/praveen-raj-r/hostr",
-    label: "GitHub Repository",
+    label: "GitHub",
     icon: Github,
   },
   {
-    href: "https://www.instagram.com/nameispraveenraj/",
-    label: "Instagram",
-    icon: Instagram,
-  },
-  {
-    href: "mailto:praveenraj.dev@gmail.com",
+    href: "mailto:praveen1220raj@gmail.com",
     label: "Email",
     icon: Mail,
   },
@@ -26,25 +21,35 @@ const links = [
 
 const Footer = () => {
   return (
-    <footer className="border-t border-gray-800/50">
-      <div className="py-8 px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="text-sm text-gray-400 text-center md:text-left font-semibold">
-          © {new Date().getFullYear()} Hostr — Built & maintained by Praveen Raj
-        </p>
+    <footer className="border-t border-white/10 bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-6">
+          {/* Left */}
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
+            © {new Date().getFullYear()}{" "}
+            <span className="font-semibold text-foreground">Hostr</span> ✦ Built
+            & Maintained by{" "}
+            <span className="font-semibold text-foreground">Praveen Raj</span>
+          </p>
 
-        <div className="flex items-center gap-4">
-          {links.map(({ href, label, icon: Icon }) => (
-            <a
-              key={href}
-              href={href}
-              target={href.startsWith("http") ? "_blank" : undefined}
-              rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-              aria-label={label}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              <Icon className="w-5 h-5" />
-            </a>
-          ))}
+          {/* Right */}
+          <div className="flex items-center gap-3">
+            {links.map(({ href, label, icon: Icon }) => (
+              <a
+                key={href}
+                href={href}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel={
+                  href.startsWith("http") ? "noopener noreferrer" : undefined
+                }
+                aria-label={label}
+                title={label}
+                className=" group inline-flex items-center justify-center h-10 w-10 rounded-full border border-white/10 bg-white/5 text-muted-foreground transition-all duration-300 hover:text-white hover:bg-purple-500/15 hover:border-purple-500/40 hover:-translate-y-0.5 active:scale-95"
+              >
+                <Icon className="h-5 w-5 transition-transform group-hover:scale-110" />
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
