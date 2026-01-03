@@ -35,10 +35,15 @@ import QRScannerModal from "../_components/qr-scanner-modal";
 import { AttendeeCard } from "../_components/attendee-card";
 
 export default function EventDashboardPage() {
+  const [isDeleted, setIsDeleted] = useState(false);
   const params = useParams();
   const router = useRouter();
-  const eventId = params.eventId;
+  const rawEventId = params.eventId;
+  if (!rawEventId) {
+    notFound();
+  }
 
+  const eventId = Array.isArray(rawEventId) ? rawEventId[0] : rawEventId;
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showQRScanner, setShowQRScanner] = useState(false);
@@ -46,16 +51,19 @@ export default function EventDashboardPage() {
   // Fetch event dashboard data
   const { data: dashboardData, isLoading } = useConvexQuery(
     api.dashboard.getEventDashboard,
-    { eventId }
+    isDeleted ? "skip" : { eventId }
   );
 
   // Fetch registrations
   const { data: registrations, isLoading: loadingRegistrations } =
-    useConvexQuery(api.registrations.getEventRegistrations, { eventId });
+    useConvexQuery(
+      api.registrations.getEventRegistrations,
+      isDeleted ? "skip" : { eventId }
+    );
 
   // Delete event mutation
   const { mutate: deleteEvent, isLoading: isDeleting } = useConvexMutation(
-    api.dashboard.deleteEvent
+    api.events.deleteEvent
   );
 
   const handleDelete = async () => {
@@ -67,8 +75,9 @@ export default function EventDashboardPage() {
 
     try {
       await deleteEvent({ eventId });
+      setIsDeleted(true);
       toast.success("Event deleted successfully");
-      router.push("/my-events");
+      router.replace("/my-events");
     } catch (error) {
       toast.error(error.message || "Failed to delete event");
     }
@@ -186,8 +195,8 @@ export default function EventDashboardPage() {
                   {event.locationType === "online"
                     ? "Online"
                     : [event?.city, event?.state || event?.country]
-                        .filter(Boolean)
-                        .join(", ")}
+                      .filter(Boolean)
+                      .join(", ")}
                 </span>
               </div>
             </div>
