@@ -1,5 +1,5 @@
 import { internal } from "./_generated/api";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 // Store or update user from Clerk
@@ -31,6 +31,10 @@ export const store = mutation({
       if (user.imageUrl !== identity.pictureUrl) {
         updates.imageUrl = identity.pictureUrl;
       }
+      // Backfill for users created before clerkUserId was tracked
+      if (user.clerkUserId !== identity.subject) {
+        updates.clerkUserId = identity.subject;
+      }
 
       if (Object.keys(updates).length > 0) {
         updates.updatedAt = Date.now();
@@ -44,11 +48,47 @@ export const store = mutation({
     return await ctx.db.insert("users", {
       email: identity.email ?? "",
       tokenIdentifier: identity.tokenIdentifier,
+      clerkUserId: identity.subject,
       name: identity.name ?? "Anonymous",
       imageUrl: identity.pictureUrl,
       hasCompletedOnboarding: false,
       freeEventsCreated: 0,
+      plan: "free",
       createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Set a user's plan from the Clerk Billing webhook (convex/clerkWebhook.js).
+// Internal only — must never be callable directly from the client, since it's
+// the sole source of truth for paid-plan gating in convex/events.js.
+export const setPlanByClerkUserId = internalMutation({
+  args: {
+    clerkUserId: v.string(),
+    plan: v.union(v.literal("free"), v.literal("pro")),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_user_id", (q) =>
+        q.eq("clerkUserId", args.clerkUserId)
+      )
+      .unique();
+
+    if (!user) {
+      // The user may not have signed into the app yet (no Convex row exists).
+      // Nothing to update — they'll get the correct plan once `store` runs
+      // and clerkUserId matches, since this webhook may also arrive again
+      // on subscription updates. Log so it's visible rather than silently lost.
+      console.warn(
+        `setPlanByClerkUserId: no Convex user found for clerkUserId=${args.clerkUserId}`
+      );
+      return;
+    }
+
+    await ctx.db.patch(user._id, {
+      plan: args.plan,
       updatedAt: Date.now(),
     });
   },

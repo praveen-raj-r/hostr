@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/purity */
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -46,6 +45,9 @@ export default function EventDetailPage() {
   const router = useRouter();
   const { user } = useUser();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  // Snapshot "now" once at mount instead of calling Date.now() during render
+  // (see app/(main)/my-tickets/page.jsx for why — same fix, same reason).
+  const [now] = useState(() => Date.now());
 
   // Fetch event details
   const { data: event, isLoading } = useConvexQuery(api.events.getEventBySlug, {
@@ -57,6 +59,10 @@ export default function EventDetailPage() {
     api.registrations.checkRegistration,
     event?._id ? { eventId: event._id } : "skip"
   );
+
+  // Current user's own Convex record (needed to check organizer ownership —
+  // event.organizerId is a Convex users._id, not a Clerk user.id)
+  const { data: currentUser } = useConvexQuery(api.users.getCurrentUser);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -98,8 +104,8 @@ export default function EventDetailPage() {
   }
 
   const isEventFull = event.registrationCount >= event.capacity;
-  const isEventPast = event.endDate < Date.now();
-  const isOrganizer = user?.id === event.organizerId;
+  const isEventPast = event.endDate < now;
+  const isOrganizer = currentUser?._id === event.organizerId;
   const isRegistrationCancelled = registration?.status === "cancelled";
   const isRegistrationConfirmed = registration?.status === "confirmed";
 
@@ -337,7 +343,7 @@ export default function EventDetailPage() {
                 ) : isOrganizer ? (
                   <Button
                     className="w-full"
-                    onClick={() => router.push(`/events/${event.slug}/manage`)}
+                    onClick={() => router.push(`/my-events/${event._id}`)}
                   >
                     Manage Event
                   </Button>

@@ -1,10 +1,45 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// Per-user rate limit: 5 requests / minute. This is process-local (a Map),
+// so on Vercel it only holds within a single serverless instance — good
+// enough to stop one signed-in account looping the endpoint, but not a
+// distributed limit. A real production fix would be Upstash Redis +
+// @upstash/ratelimit, shared across instances.
+const RATE_LIMIT = 5;
+const RATE_WINDOW_MS = 60_000;
+const requestLog = new Map(); // userId -> timestamps[]
+
+function isRateLimited(userId) {
+  const now = Date.now();
+  const timestamps = (requestLog.get(userId) ?? []).filter(
+    (t) => now - t < RATE_WINDOW_MS
+  );
+  timestamps.push(now);
+  requestLog.set(userId, timestamps);
+  return timestamps.length > RATE_LIMIT;
+}
+
 export async function POST(req) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: "You must be signed in to use AI event generation" },
+        { status: 401 }
+      );
+    }
+
+    if (isRateLimited(userId)) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a minute and try again." },
+        { status: 429 }
+      );
+    }
+
     const { prompt } = await req.json();
 
     if (!prompt) {

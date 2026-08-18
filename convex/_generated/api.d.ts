@@ -8,9 +8,11 @@
  * @module
  */
 
+import type * as clerkWebhook from "../clerkWebhook.js";
 import type * as dashboard from "../dashboard.js";
 import type * as events from "../events.js";
 import type * as explore from "../explore.js";
+import type * as http from "../http.js";
 import type * as registrations from "../registrations.js";
 import type * as search from "../search.js";
 import type * as seed from "../seed.js";
@@ -23,9 +25,11 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  clerkWebhook: typeof clerkWebhook;
   dashboard: typeof dashboard;
   events: typeof events;
   explore: typeof explore;
+  http: typeof http;
   registrations: typeof registrations;
   search: typeof search;
   seed: typeof seed;

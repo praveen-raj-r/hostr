@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { QrCode, Loader2 } from "lucide-react";
+import { QrCode, Loader2, KeyRound } from "lucide-react";
 import { useConvexMutation } from "@/hooks/use-convex-query";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
@@ -13,14 +13,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 export default function QRScannerModal({ isOpen, onClose }) {
   const [scannerReady, setScannerReady] = useState(false);
   const [error, setError] = useState(null);
+  const [manualCode, setManualCode] = useState("");
 
-  const { mutate: checkInAttendee } = useConvexMutation(
-    api.registrations.checkInAttendee
-  );
+  const { mutate: checkInAttendee, isLoading: isCheckingIn } =
+    useConvexMutation(api.registrations.checkInAttendee);
 
   const handleCheckIn = async (qrCode) => {
     try {
@@ -35,6 +38,14 @@ export default function QRScannerModal({ isOpen, onClose }) {
     } catch (error) {
       toast.error(error.message || "Invalid QR code");
     }
+  };
+
+  const handleManualSubmit = (e) => {
+    e.preventDefault();
+    const code = manualCode.trim();
+    if (!code) return;
+    handleCheckIn(code);
+    setManualCode("");
   };
 
   // Initialize QR Scanner
@@ -154,6 +165,35 @@ export default function QRScannerModal({ isOpen, onClose }) {
             </p>
           </>
         )}
+
+        <Separator />
+
+        <form onSubmit={handleManualSubmit} className="space-y-2">
+          <label
+            htmlFor="manual-ticket-code"
+            className="text-sm font-medium flex items-center gap-2"
+          >
+            <KeyRound className="w-4 h-4" />
+            Enter ticket ID manually
+          </label>
+          <div className="flex gap-2">
+            <Input
+              id="manual-ticket-code"
+              value={manualCode}
+              onChange={(e) => setManualCode(e.target.value)}
+              placeholder="e.g. EVT-1700000000000-ABC123XYZ"
+              disabled={isCheckingIn}
+              autoComplete="off"
+            />
+            <Button type="submit" disabled={isCheckingIn || !manualCode.trim()}>
+              {isCheckingIn ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Check In"
+              )}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

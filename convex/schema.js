@@ -7,6 +7,7 @@ export default defineSchema({
     // Clerk auth
     email: v.string(),
     tokenIdentifier: v.string(), // Clerk user ID for auth
+    clerkUserId: v.optional(v.string()), // Raw Clerk user id (identity.subject) — used to match Clerk Billing webhook events, which reference the user by this id rather than tokenIdentifier
     name: v.string(),
     imageUrl: v.optional(v.string()),
 
@@ -25,11 +26,16 @@ export default defineSchema({
 
     // Organizer tracking (User Subscription)
     freeEventsCreated: v.number(), // Track free event limit (1 free)
+    // Authoritative plan, set only by the Clerk Billing webhook handler (convex/clerkWebhook.js).
+    // Do NOT derive this from client input or from hasCompletedOnboarding — see convex/events.js.
+    plan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
 
     // Timestamps
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_token", ["tokenIdentifier"]), // Primary auth lookup
+  })
+    .index("by_token", ["tokenIdentifier"]) // Primary auth lookup
+    .index("by_clerk_user_id", ["clerkUserId"]), // Webhook lookup
 
   // Events table
   events: defineTable({

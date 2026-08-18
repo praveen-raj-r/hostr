@@ -1,9 +1,8 @@
-/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
@@ -42,6 +41,17 @@ import { FREE_PLAN_LIMIT } from "@/lib/constants";
 
 // HH:MM in 24h
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+// Friendly names for the fixed color palette below, used only for the
+// screen-reader label on each swatch button.
+const COLOR_NAMES = {
+  "#1e3a8a": "Navy blue",
+  "#4c1d95": "Deep purple",
+  "#065f46": "Forest green",
+  "#92400e": "Amber",
+  "#7f1d1d": "Deep red",
+  "#831843": "Magenta",
+};
 
 const eventSchema = z
   .object({
@@ -100,7 +110,6 @@ export default function CreateEventPage() {
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
     control,
     formState: { errors },
@@ -121,12 +130,17 @@ export default function CreateEventPage() {
     },
   });
 
-  const themeColor = watch("themeColor");
-  const ticketType = watch("ticketType");
-  const selectedState = watch("state");
-  const startDate = watch("startDate");
-  const endDate = watch("endDate");
-  const coverImage = watch("coverImage");
+  // useWatch (a proper subscription hook) instead of calling watch("field")
+  // during render — the latter is what react-hooks/incompatible-library was
+  // flagging (react-hook-form's watch() isn't safe for the React Compiler to
+  // reason about), and it was previously silenced with a file-level
+  // eslint-disable instead of switching to the hook meant for this.
+  const themeColor = useWatch({ control, name: "themeColor" });
+  const ticketType = useWatch({ control, name: "ticketType" });
+  const selectedState = useWatch({ control, name: "state" });
+  const startDate = useWatch({ control, name: "startDate" });
+  const endDate = useWatch({ control, name: "endDate" });
+  const coverImage = useWatch({ control, name: "coverImage" });
 
   const indianStates = useMemo(() => State.getStatesOfCountry("IN"), []);
   const cities = useMemo(() => {
@@ -175,7 +189,7 @@ export default function CreateEventPage() {
       }
 
       // Check event limit for Free users
-      if (!hasPro && currentUser?.freeEventsCreated >= 1) {
+      if (!hasPro && currentUser?.freeEventsCreated >= FREE_PLAN_LIMIT) {
         setUpgradeReason("limit");
         setShowUpgradeModal(true);
         return;
@@ -278,29 +292,35 @@ export default function CreateEventPage() {
               )}
             </div>
             <div className="flex gap-2 flex-wrap">
-              {colorPresets.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  className={`w-10 h-10 rounded-full border-2 transition-all ${!hasPro && color !== "#1e3a8a"
-                      ? "opacity-40 cursor-not-allowed"
-                      : "hover:scale-110"
-                    }`}
-                  style={{
-                    backgroundColor: color,
-                    borderColor: themeColor === color ? "white" : "transparent",
-                  }}
-                  onClick={() => handleColorClick(color)}
-                  title={
-                    !hasPro && color !== "#1e3a8a"
-                      ? "Upgrade to Pro for custom colors"
-                      : ""
-                  }
-                />
-              ))}
+              {colorPresets.map((color) => {
+                const locked = !hasPro && color !== "#1e3a8a";
+                const name = COLOR_NAMES[color] ?? color;
+                const label = locked
+                  ? `${name} (Pro only — upgrade to unlock)`
+                  : `${name}${themeColor === color ? " (selected)" : ""}`;
+                return (
+                  <button
+                    key={color}
+                    type="button"
+                    aria-label={label}
+                    aria-pressed={themeColor === color}
+                    className={`w-10 h-10 rounded-full border-2 transition-all ${locked
+                        ? "opacity-40 cursor-not-allowed"
+                        : "hover:scale-110"
+                      }`}
+                    style={{
+                      backgroundColor: color,
+                      borderColor: themeColor === color ? "white" : "transparent",
+                    }}
+                    onClick={() => handleColorClick(color)}
+                    title={locked ? "Upgrade to Pro for custom colors" : ""}
+                  />
+                );
+              })}
               {!hasPro && (
                 <button
                   type="button"
+                  aria-label="Unlock more theme colors with Pro"
                   onClick={() => {
                     setUpgradeReason("color");
                     setShowUpgradeModal(true);

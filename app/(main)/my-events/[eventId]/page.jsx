@@ -73,14 +73,41 @@ export default function EventDashboardPage() {
 
     if (!confirmed) return;
 
+    // Skip the dashboard/registrations queries *before* the mutation runs,
+    // not after it resolves. Both are live Convex subscriptions on this
+    // eventId — once the event is gone server-side, they'd otherwise react
+    // mid-delete (dashboardData briefly becomes null) and trip the
+    // `notFound()` below for a render or two before router.replace lands.
+    // Skipping up front means we just show the loading spinner through the
+    // whole delete instead of a 404 flash.
+    setIsDeleted(true);
+
     try {
       await deleteEvent({ eventId });
-      setIsDeleted(true);
       toast.success("Event deleted successfully");
       router.replace("/my-events");
     } catch (error) {
+      // Deletion failed — resume the live queries so the page recovers
+      // instead of being stuck on a permanently-skipped loading state.
+      setIsDeleted(false);
       toast.error(error.message || "Failed to delete event");
     }
+  };
+
+  // RFC 4180 escaping (quote fields containing commas/quotes/newlines, double
+  // embedded quotes) plus a guard against CSV-formula injection: a leading
+  // =, +, -, or @ is treated as a formula by Excel/Sheets when the file is
+  // opened, so user-supplied fields (name/email) get a leading apostrophe
+  // to force text interpretation.
+  const escapeCsvField = (value, { neutralizeFormulas = false } = {}) => {
+    let field = String(value ?? "");
+    if (neutralizeFormulas && /^[=+\-@]/.test(field)) {
+      field = `'${field}`;
+    }
+    if (/[",\n]/.test(field)) {
+      field = `"${field.replace(/"/g, '""')}"`;
+    }
+    return field;
   };
 
   const handleExportCSV = () => {
@@ -99,12 +126,14 @@ export default function EventDashboardPage() {
         "QR Code",
       ],
       ...registrations.map((reg) => [
-        reg.attendeeName,
-        reg.attendeeEmail,
-        new Date(reg.registeredAt).toLocaleString(),
-        reg.checkedIn ? "Yes" : "No",
-        reg.checkedInAt ? new Date(reg.checkedInAt).toLocaleString() : "-",
-        reg.qrCode,
+        escapeCsvField(reg.attendeeName, { neutralizeFormulas: true }),
+        escapeCsvField(reg.attendeeEmail, { neutralizeFormulas: true }),
+        escapeCsvField(new Date(reg.registeredAt).toLocaleString()),
+        escapeCsvField(reg.checkedIn ? "Yes" : "No"),
+        escapeCsvField(
+          reg.checkedInAt ? new Date(reg.checkedInAt).toLocaleString() : "-"
+        ),
+        escapeCsvField(reg.qrCode),
       ]),
     ]
       .map((row) => row.join(","))

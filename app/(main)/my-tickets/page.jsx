@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/purity */
 "use client";
 
 import { useState } from "react";
@@ -24,6 +23,11 @@ import EventCard from "@/components/event-card";
 export default function MyTicketsPage() {
   const router = useRouter();
   const [selectedTicket, setSelectedTicket] = useState(null);
+  // Snapshot "now" once at mount instead of calling Date.now() during render
+  // (calling it inline makes every render non-deterministic, which is what
+  // the react-hooks/purity rule was flagging — this used to be silenced
+  // with an eslint-disable instead of fixed).
+  const [now] = useState(() => Date.now());
 
   const { data: registrations, isLoading } = useConvexQuery(
     api.registrations.getMyRegistrations
@@ -51,8 +55,6 @@ export default function MyTicketsPage() {
       </div>
     );
   }
-
-  const now = Date.now();
 
   const upcomingTickets = registrations?.filter(
     (reg) =>

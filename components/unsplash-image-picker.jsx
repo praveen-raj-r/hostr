@@ -21,12 +21,16 @@ export default function UnsplashImagePicker({ isOpen, onClose, onSelect }) {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://api.unsplash.com/search/photos?query=${searchQuery}&per_page=12&client_id=${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`
+        `/api/unsplash-search?query=${encodeURIComponent(searchQuery)}&per_page=12`
       );
+      if (!response.ok) {
+        throw new Error("Image search failed");
+      }
       const data = await response.json();
       setImages(data.results || []);
     } catch (error) {
       console.error("Error fetching images:", error);
+      setImages([]);
     } finally {
       setLoading(false);
     }

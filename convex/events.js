@@ -2,6 +2,9 @@ import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+// Keep in sync with FREE_PLAN_LIMIT in lib/constants.js
+const FREE_PLAN_LIMIT = 1;
+
 // Create a new event
 export const createEvent = mutation({
   args: {
@@ -23,14 +26,16 @@ export const createEvent = mutation({
     ticketPrice: v.optional(v.number()),
     coverImage: v.optional(v.string()),
     themeColor: v.optional(v.string()),
-    hasPro: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     try {
       const user = await ctx.runQuery(internal.users.getCurrentUser);
-      const hasPro = user?.hasCompletedOnboarding ? true : false;
+      // hasPro must come from our own DB, set only by the Clerk Billing
+      // webhook (convex/clerkWebhook.js) — never from client input or from
+      // hasCompletedOnboarding, which every attendee sets regardless of plan.
+      const hasPro = user?.plan === "pro";
       // SERVER-SIDE CHECK: Verify event limit for Free users
-      if (!hasPro && user.freeEventsCreated >= 1) {
+      if (!hasPro && user.freeEventsCreated >= FREE_PLAN_LIMIT) {
         throw new Error(
           "Free event limit reached. Please upgrade to Pro to create more events."
         );
