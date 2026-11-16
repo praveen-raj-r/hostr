@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { QrCode, Loader2, KeyRound } from "lucide-react";
 import { useConvexMutation } from "@/hooks/use-convex-query";
 import { api } from "@/convex/_generated/api";
@@ -39,6 +39,13 @@ export default function QRScannerModal({ isOpen, onClose }) {
       toast.error(error.message || "Invalid QR code");
     }
   };
+
+  // The scanner effect below only re-runs when `isOpen` changes, so scan
+  // callbacks go through this ref to always call the latest handleCheckIn.
+  const handleCheckInRef = useRef(handleCheckIn);
+  useEffect(() => {
+    handleCheckInRef.current = handleCheckIn;
+  });
 
   const handleManualSubmit = (e) => {
     e.preventDefault();
@@ -95,7 +102,7 @@ export default function QRScannerModal({ isOpen, onClose }) {
           if (scanner) {
             scanner.clear().catch(console.error);
           }
-          handleCheckIn(decodedText);
+          handleCheckInRef.current(decodedText);
         };
 
         const onScanError = (error) => {
