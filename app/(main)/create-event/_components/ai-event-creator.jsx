@@ -75,6 +75,7 @@ export default function AIEventCreator({ onEventGenerated }) {
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Example: A tech meetup about React 19 for developers in Bangalore. It should cover new features like Actions and use hook improvements..."
             rows={6}
+            maxLength={500}
             className="resize-none"
           />
 

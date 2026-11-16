@@ -1,12 +1,22 @@
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+import { isRateLimited } from "@/lib/rate-limit";
 
 // Proxies Unsplash search so the access key stays server-side. The client
 // previously called api.unsplash.com directly with
 // NEXT_PUBLIC_UNSPLASH_ACCESS_KEY inlined in the URL — anyone could read
 // that key out of the bundle/network tab and burn or get it revoked.
 export async function GET(req) {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  }
+  if (isRateLimited(`unsplash:${userId}`, 30, 60_000)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
-  const query = searchParams.get("query")?.trim();
+  const query = searchParams.get("query")?.trim().slice(0, 100);
   const perPage = Math.min(
     Math.max(parseInt(searchParams.get("per_page") ?? "12", 10) || 12, 1),
     30
