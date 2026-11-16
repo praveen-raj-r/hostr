@@ -17,26 +17,27 @@ const INACTIVE_EVENTS = new Set([
   "subscriptionItem.abandoned",
 ]);
 
-// NOTE ON PAYLOAD SHAPE: Clerk's exact Billing webhook payload field names
-// (where the Clerk user id and plan slug live inside `data`) could not be
-// confirmed from documentation at the time this was written. This tries
-// several plausible locations and the handler logs the raw payload so the
-// real shape can be read from Convex's function logs on the first real
-// webhook delivery — adjust these two functions if the fields differ.
+// Payload shape per Clerk's Billing webhook docs: the user id is at
+// data.payer.user_id and the plan slug at data.plan.slug. (Documented for the
+// subscriptionItem.* family; if Clerk's real payload ever differs, the handler
+// logs the payload's key structure — never its values — to make that visible.)
 function extractClerkUserId(data) {
-  return (
-    data?.payer?.user_id ??
-    data?.payer_id ??
-    data?.subscriber_id ??
-    data?.user_id ??
-    data?.subscription?.payer?.user_id ??
-    null
-  );
+  return data?.payer?.user_id ?? null;
 }
 
 function extractPlanSlug(data) {
-  const slug = data?.plan?.slug ?? data?.plan_slug ?? data?.plan?.name ?? null;
-  return slug ? String(slug).toLowerCase() : null;
+  const slug = data?.plan?.slug;
+  return typeof slug === "string" ? slug.toLowerCase() : null;
+}
+
+// Key names only, so logs stay useful without leaking PII or billing details.
+function describeShape(value, depth = 0) {
+  if (value === null || typeof value !== "object" || depth >= 2) {
+    return typeof value;
+  }
+  return Object.fromEntries(
+    Object.entries(value).map(([k, v]) => [k, describeShape(v, depth + 1)])
+  );
 }
 
 export const handleClerkWebhook = internalAction({
@@ -68,10 +69,6 @@ export const handleClerkWebhook = internalAction({
 
     const { type, data } = event;
 
-    // Logged deliberately: this is how you confirm/fix the field paths above
-    // against the real payload shape from your Clerk account.
-    console.log(`Clerk webhook received: ${type}`, JSON.stringify(data));
-
     if (!ACTIVE_EVENTS.has(type) && !INACTIVE_EVENTS.has(type)) {
       // Not a plan-affecting event we care about (e.g. paymentAttempt.*) — ignore.
       return;
@@ -80,7 +77,7 @@ export const handleClerkWebhook = internalAction({
     const clerkUserId = extractClerkUserId(data);
     if (!clerkUserId) {
       console.warn(
-        `Clerk webhook ${type}: could not find a Clerk user id in the payload — see logged payload above and fix extractClerkUserId().`
+        `Clerk webhook ${type}: no payer.user_id in payload. Shape: ${JSON.stringify(describeShape(data))}`
       );
       return;
     }
@@ -90,11 +87,12 @@ export const handleClerkWebhook = internalAction({
       const slug = extractPlanSlug(data);
       if (!slug) {
         console.warn(
-          `Clerk webhook ${type}: could not find a plan slug in the payload — see logged payload above and fix extractPlanSlug().`
+          `Clerk webhook ${type}: no plan.slug in payload. Shape: ${JSON.stringify(describeShape(data))}`
         );
         return;
       }
-      plan = slug.includes("pro") ? "pro" : "free";
+      // Must match the slug used by has({ plan: "pro" }) in the client.
+      plan = slug === "pro" ? "pro" : "free";
     }
     // INACTIVE_EVENTS always mean plan = "free" (already set above).
 
