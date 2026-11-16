@@ -19,7 +19,7 @@ export const searchEvents = query({
       .query("events")
       .withSearchIndex("search_title", (q) => q.search("title", args.query))
       .filter((q) => q.gte(q.field("startDate"), now))
-      .take(args.limit ?? 5);
+      .take(Math.min(Math.max(Math.floor(args.limit ?? 5), 1), 20));
 
     return searchResults;
   },

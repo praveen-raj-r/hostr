@@ -1,16 +1,12 @@
-import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requireUser } from "./lib/auth";
 
 // Get event with detailed stats for dashboard
 export const getEventDashboard = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
-
-    if (!user) {
-      throw new Error("User not found");
-    }
+    const user = await requireUser(ctx);
 
     const event = await ctx.db.get(args.eventId);
 

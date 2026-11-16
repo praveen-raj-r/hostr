@@ -1,6 +1,6 @@
-import { internal } from "./_generated/api";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requireUser } from "./lib/auth";
 
 // Store or update user from Clerk
 export const store = mutation({
@@ -110,10 +110,7 @@ export const getCurrentUser = query({
       )
       .unique();
 
-    if (!user) {
-      throw new Error("User not found");
-    }
-
+    // null until users.store has created the row (e.g. first page load).
     return user;
   },
 });
@@ -129,7 +126,7 @@ export const completeOnboarding = mutation({
     interests: v.array(v.string()), // Min 3 categories
   },
   handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    const user = await requireUser(ctx);
 
     await ctx.db.patch(user._id, {
       location: args.location,

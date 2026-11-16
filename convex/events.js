@@ -1,6 +1,7 @@
 import { internal } from "./_generated/api";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requireUser } from "./lib/auth";
 
 // Keep in sync with FREE_PLAN_LIMIT in lib/constants.js
 const FREE_PLAN_LIMIT = 1;
@@ -29,7 +30,7 @@ export const createEvent = mutation({
   },
   handler: async (ctx, args) => {
     try {
-      const user = await ctx.runQuery(internal.users.getCurrentUser);
+      const user = await requireUser(ctx);
       // hasPro must come from our own DB, set only by the Clerk Billing
       // webhook (convex/clerkWebhook.js) — never from client input or from
       // hasCompletedOnboarding, which every attendee sets regardless of plan.
@@ -107,7 +108,7 @@ export const createEvent = mutation({
         ...args,
         title,
         themeColor, // Use validated color
-        slug: `${slug}-${Date.now()}`,
+        slug: `${slug}-${crypto.randomUUID().slice(0, 8)}`,
         organizerId: user._id,
         organizerName: user.name,
         registrationCount: 0,
@@ -143,7 +144,7 @@ export const getEventBySlug = query({
 // Get events by organizer
 export const getMyEvents = query({
   handler: async (ctx) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    const user = await requireUser(ctx);
 
     const events = await ctx.db
       .query("events")
@@ -159,7 +160,7 @@ export const getMyEvents = query({
 export const deleteEvent = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    const user = await requireUser(ctx);
 
     const event = await ctx.db.get(args.eventId);
     if (!event) {
@@ -171,26 +172,47 @@ export const deleteEvent = mutation({
       throw new Error("You are not authorized to delete this event");
     }
 
-    // Delete all registrations for this event
-    const registrations = await ctx.db
-      .query("registrations")
-      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
-      .collect();
-
-    for (const registration of registrations) {
-      await ctx.db.delete(registration._id);
-    }
-
-    // Delete the event
+    // Delete the event now and the first batch of registrations; if there are
+    // more, finish in follow-up mutations so no single mutation exceeds
+    // Convex's read/write limits for very large events.
     await ctx.db.delete(args.eventId);
 
-    // Update free event count if it was a free event
-    if (event.ticketType === "free" && user.freeEventsCreated > 0) {
+    // Every created event counts toward the free quota (see createEvent),
+    // so every deletion gives one back.
+    if (user.freeEventsCreated > 0) {
       await ctx.db.patch(user._id, {
         freeEventsCreated: user.freeEventsCreated - 1,
       });
     }
 
+    await ctx.scheduler.runAfter(0, internal.events.purgeRegistrations, {
+      eventId: args.eventId,
+    });
+
     return { success: true };
+  },
+});
+
+const PURGE_BATCH_SIZE = 500;
+
+// Internal: deletes an event's registrations in batches, re-scheduling itself
+// until none remain.
+export const purgeRegistrations = internalMutation({
+  args: { eventId: v.id("events") },
+  handler: async (ctx, args) => {
+    const batch = await ctx.db
+      .query("registrations")
+      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+      .take(PURGE_BATCH_SIZE);
+
+    for (const registration of batch) {
+      await ctx.db.delete(registration._id);
+    }
+
+    if (batch.length === PURGE_BATCH_SIZE) {
+      await ctx.scheduler.runAfter(0, internal.events.purgeRegistrations, {
+        eventId: args.eventId,
+      });
+    }
   },
 });

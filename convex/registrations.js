@@ -1,6 +1,6 @@
-import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requireUser } from "./lib/auth";
 
 // Generate unique QR code ID
 function generateQRCode() {
@@ -15,7 +15,7 @@ export const registerForEvent = mutation({
     attendeeEmail: v.string(),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    const user = await requireUser(ctx);
 
     const attendeeName = args.attendeeName.trim();
     const attendeeEmail = args.attendeeEmail.trim();
@@ -93,9 +93,7 @@ export const registerForEvent = mutation({
 export const checkRegistration = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
-
-    if (!user) return null;
+    const user = await requireUser(ctx);
 
     const registration = await ctx.db
       .query("registrations")
@@ -111,7 +109,7 @@ export const checkRegistration = query({
 // Get user's registrations (tickets)
 export const getMyRegistrations = query({
   handler: async (ctx) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    const user = await requireUser(ctx);
 
     const registrations = await ctx.db
       .query("registrations")
@@ -120,6 +118,7 @@ export const getMyRegistrations = query({
       .collect();
 
     // Fetch event details for each registration
+    // Registrations whose event was deleted (pending cleanup) are skipped below.
     const registrationsWithEvents = await Promise.all(
       registrations.map(async (reg) => {
         const event = await ctx.db.get(reg.eventId);
@@ -130,7 +129,7 @@ export const getMyRegistrations = query({
       })
     );
 
-    return registrationsWithEvents;
+    return registrationsWithEvents.filter((r) => r.event !== null);
   },
 });
 
@@ -138,7 +137,7 @@ export const getMyRegistrations = query({
 export const cancelRegistration = mutation({
   args: { registrationId: v.id("registrations") },
   handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    const user = await requireUser(ctx);
 
     const registration = await ctx.db.get(args.registrationId);
     if (!registration) {
@@ -179,7 +178,7 @@ export const cancelRegistration = mutation({
 export const getEventRegistrations = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    const user = await requireUser(ctx);
 
     const event = await ctx.db.get(args.eventId);
     if (!event) {
@@ -204,7 +203,7 @@ export const getEventRegistrations = query({
 export const checkInAttendee = mutation({
   args: { qrCode: v.string() },
   handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    const user = await requireUser(ctx);
 
     const registration = await ctx.db
       .query("registrations")
