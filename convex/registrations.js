@@ -4,7 +4,7 @@ import { v } from "convex/values";
 
 // Generate unique QR code ID
 function generateQRCode() {
-  return `EVT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  return `EVT-${crypto.randomUUID().toUpperCase()}`;
 }
 
 // Register for an event
@@ -16,6 +16,15 @@ export const registerForEvent = mutation({
   },
   handler: async (ctx, args) => {
     const user = await ctx.runQuery(internal.users.getCurrentUser);
+
+    const attendeeName = args.attendeeName.trim();
+    const attendeeEmail = args.attendeeEmail.trim();
+    if (!attendeeName || attendeeName.length > 100) {
+      throw new Error("Please provide a valid name (max 100 characters)");
+    }
+    if (attendeeEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(attendeeEmail)) {
+      throw new Error("Please provide a valid email address");
+    }
 
     const event = await ctx.db.get(args.eventId);
     if (!event) {
@@ -35,17 +44,36 @@ export const registerForEvent = mutation({
       )
       .unique();
 
-    if (existingRegistration) {
+    if (existingRegistration && existingRegistration.status !== "cancelled") {
       throw new Error("You are already registered for this event");
     }
 
-    // Create registration
     const qrCode = generateQRCode();
+
+    // Re-registering after a cancellation: reactivate the existing row
+    // (by_event_user is unique per user/event) with a fresh QR code.
+    if (existingRegistration) {
+      await ctx.db.patch(existingRegistration._id, {
+        attendeeName,
+        attendeeEmail,
+        qrCode,
+        checkedIn: false,
+        checkedInAt: undefined,
+        status: "confirmed",
+        registeredAt: Date.now(),
+      });
+      await ctx.db.patch(args.eventId, {
+        registrationCount: event.registrationCount + 1,
+      });
+      return existingRegistration._id;
+    }
+
+    // Create registration
     const registrationId = await ctx.db.insert("registrations", {
       eventId: args.eventId,
       userId: user._id,
-      attendeeName: args.attendeeName,
-      attendeeEmail: args.attendeeEmail,
+      attendeeName,
+      attendeeEmail,
       qrCode: qrCode,
       checkedIn: false,
       status: "confirmed",
@@ -122,6 +150,10 @@ export const cancelRegistration = mutation({
       throw new Error("You are not authorized to cancel this registration");
     }
 
+    if (registration.status === "cancelled") {
+      throw new Error("This registration is already cancelled");
+    }
+
     const event = await ctx.db.get(registration.eventId);
     if (!event) {
       throw new Error("Event not found");
@@ -191,6 +223,10 @@ export const checkInAttendee = mutation({
     // Check if user is the organizer
     if (event.organizerId !== user._id) {
       throw new Error("You are not authorized to check in attendees");
+    }
+
+    if (registration.status === "cancelled") {
+      throw new Error("This registration has been cancelled");
     }
 
     // Check if already checked in

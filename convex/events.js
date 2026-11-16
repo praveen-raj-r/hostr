@@ -34,6 +34,50 @@ export const createEvent = mutation({
       // webhook (convex/clerkWebhook.js) — never from client input or from
       // hasCompletedOnboarding, which every attendee sets regardless of plan.
       const hasPro = user?.plan === "pro";
+      // SERVER-SIDE CHECK: Validate input
+      const title = args.title.trim();
+      if (!title || title.length > 120) {
+        throw new Error("Title is required (max 120 characters)");
+      }
+      if (args.description.length > 5000) {
+        throw new Error("Description is too long (max 5000 characters)");
+      }
+      if (args.tags.length > 10 || args.tags.some((t) => t.length > 50)) {
+        throw new Error("Too many or too long tags");
+      }
+      if (!Number.isFinite(args.startDate) || !Number.isFinite(args.endDate) || args.endDate < args.startDate) {
+        throw new Error("End date must be after the start date");
+      }
+      if (!Number.isInteger(args.capacity) || args.capacity < 1 || args.capacity > 100000) {
+        throw new Error("Capacity must be a whole number between 1 and 100000");
+      }
+      if (args.ticketPrice !== undefined && (!Number.isFinite(args.ticketPrice) || args.ticketPrice < 0 || args.ticketPrice > 1000000)) {
+        throw new Error("Invalid ticket price");
+      }
+      const isHttpUrl = (u) => {
+        try {
+          return ["http:", "https:"].includes(new URL(u).protocol);
+        } catch {
+          return false;
+        }
+      };
+      if (args.venue && !isHttpUrl(args.venue)) {
+        throw new Error("Venue link must be an http(s) URL");
+      }
+      if (args.coverImage) {
+        let host = "";
+        try {
+          const u = new URL(args.coverImage);
+          host = u.protocol === "https:" ? u.hostname : "";
+        } catch {}
+        if (host !== "images.unsplash.com") {
+          throw new Error("Cover image must be an https Unsplash image");
+        }
+      }
+      if (args.themeColor && !/^#[0-9a-fA-F]{6}$/.test(args.themeColor)) {
+        throw new Error("Invalid theme color");
+      }
+
       // SERVER-SIDE CHECK: Verify event limit for Free users
       if (!hasPro && user.freeEventsCreated >= FREE_PLAN_LIMIT) {
         throw new Error(
@@ -53,7 +97,7 @@ export const createEvent = mutation({
       const themeColor = hasPro ? args.themeColor : defaultColor;
 
       // Generate slug from title
-      const slug = args.title
+      const slug = title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
@@ -61,6 +105,7 @@ export const createEvent = mutation({
       // Create event
       const eventId = await ctx.db.insert("events", {
         ...args,
+        title,
         themeColor, // Use validated color
         slug: `${slug}-${Date.now()}`,
         organizerId: user._id,
