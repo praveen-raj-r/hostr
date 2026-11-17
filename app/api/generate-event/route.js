@@ -10,8 +10,18 @@ const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 60_000;
 const MAX_PROMPT_LENGTH = 500;
 const CATEGORIES = [
-  "tech", "music", "sports", "art", "food", "business",
-  "health", "education", "gaming", "networking", "outdoor", "community",
+  "tech",
+  "music",
+  "sports",
+  "art",
+  "food",
+  "business",
+  "health",
+  "education",
+  "gaming",
+  "networking",
+  "outdoor",
+  "community",
 ];
 
 const aiEventSchema = z.object({
@@ -28,14 +38,14 @@ export async function POST(req) {
     if (!userId) {
       return NextResponse.json(
         { error: "You must be signed in to use AI event generation" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (isRateLimited(`ai:${userId}`, RATE_LIMIT, RATE_WINDOW_MS)) {
       return NextResponse.json(
         { error: "Too many requests. Please wait a minute and try again." },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -45,17 +55,19 @@ export async function POST(req) {
     if (!prompt) {
       return NextResponse.json(
         { error: "Prompt is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (prompt.length > MAX_PROMPT_LENGTH) {
       return NextResponse.json(
         { error: `Prompt must be ${MAX_PROMPT_LENGTH} characters or fewer` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({
+      model: process.env.GEMINI_MODEL || "gemini-3.5-flash",
+    });
 
     const systemPrompt = `You are an event planning assistant. Generate event details based on the user's description.
 
@@ -100,7 +112,7 @@ Rules:
     } else if (cleanedText.startsWith("```")) {
       cleanedText = cleanedText.replace(/```\n?/g, "");
     }
- 
+
     let eventData;
     try {
       eventData = aiEventSchema.parse(JSON.parse(cleanedText));
@@ -115,7 +127,7 @@ Rules:
       {
         error: "AI service temporarily unavailable. Please try again later.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
