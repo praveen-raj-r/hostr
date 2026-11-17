@@ -32,16 +32,20 @@ export default function Header() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-xl z-20 border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 min-h-16 py-2 flex items-center gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link
+            href="/"
+            aria-label="Hostr home"
+            className="flex items-center shrink-0"
+          >
             <Image
               src="/hostr.png"
               alt="Hostr logo"
               width={500}
               height={500}
-              className="w-full h-11"
+              className="w-auto h-9"
               priority
             />
 
@@ -53,43 +57,50 @@ export default function Header() {
             )}
           </Link>
 
-          {/* Search & Location - Desktop Only */}
-          <div className="hidden md:flex flex-1 justify-center">
+          {/* Search & Location - Desktop */}
+          <div className="hidden md:flex flex-1 justify-center min-w-0">
             <SearchLocationBar />
           </div>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center">
-            {/* Show Pro badge or Upgrade button */}
+          {/* Right side actions */}
+          <nav
+            aria-label="Main"
+            className="ml-auto flex items-center gap-1 sm:gap-2"
+          >
             {!hasPro && (
               <Button
                 variant="ghost"
-                size="sm"
+                className="hidden sm:inline-flex h-11"
                 onClick={() => setShowUpgradeModal(true)}
               >
                 Pricing
               </Button>
             )}
 
-            <Button variant="ghost" size="sm" asChild className="mr-2">
+            <Button
+              variant="ghost"
+              asChild
+              className="hidden sm:inline-flex h-11"
+            >
               <Link href="/explore">Explore</Link>
             </Button>
 
             <Authenticated>
-              {/* Create Event Button */}
-              <Button size="sm" asChild className="sm:flex gap-2 mr-4 hidden">
+              <Button
+                asChild
+                className="hidden md:inline-flex h-11 px-4 gap-2"
+              >
                 <Link href="/create-event">
                   <Plus className="size-4" />
-                  <span className="hidden sm:inline">Create Event</span>
+                  Create event
                 </Link>
               </Button>
 
-              {/* User Button */}
               <UserButton
                 afterSignOutUrl="/"
                 appearance={{
                   elements: {
-                    avatarBox: "w-9 h-9",
+                    avatarBox: "size-10",
                   },
                 }}
               >
@@ -111,24 +122,14 @@ export default function Header() {
 
             <Unauthenticated>
               <SignInButton mode="modal">
-                <Button size="sm">Sign In</Button>
+                <Button className="h-11 px-5">Sign in</Button>
               </SignInButton>
             </Unauthenticated>
-          </div>
+          </nav>
         </div>
-        <Authenticated>
-          <div className="sm:hidden block px-4 pb-4">
-            {/* Create Event Button */}
-            <Button size="sm" asChild className="flex gap-2">
-              <Link href="/create-event">
-                <Plus className="w-4 h-4" />
-                <span>Create Event</span>
-              </Link>
-            </Button>{" "}
-          </div>
-        </Authenticated>
-        {/* Mobile Search & Location - Below Header */}
-        <div className="md:hidden border-t px-3 py-3">
+
+        {/* Mobile search and location, below the main row */}
+        <div className="md:hidden border-t px-3 py-2">
           <SearchLocationBar />
         </div>
 
@@ -137,7 +138,7 @@ export default function Header() {
             <BarLoader width={"100%"} color="#a855f7" />
           </div>
         )}
-      </nav>
+      </header>
 
       {/* Onboarding Modal */}
       <OnboardingModal

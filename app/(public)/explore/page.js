@@ -91,9 +91,11 @@ export default function ExplorePage() {
   return (
     <>
       {/* Hero Title */}
-      <div className="pb-12 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold mb-4">Discover Events</h1>
-        <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+      <div className="pb-8 px-4 sm:px-6">
+        <h1 className="text-[clamp(30px,5.5vw,52px)] font-bold tracking-[-0.035em]">
+          Discover events
+        </h1>
+        <p className="mt-2 text-muted-foreground max-w-3xl">
           Explore featured events, find what&apos;s happening locally, or browse
           events across India
         </p>
@@ -101,7 +103,7 @@ export default function ExplorePage() {
 
       {/* Featured Carousel */}
       {featuredEvents && featuredEvents.length > 0 && (
-        <div className="mb-16">
+        <div className="mb-16 px-4 sm:px-6">
           <Carousel
             plugins={[plugin]}
             className="w-full"
@@ -112,7 +114,7 @@ export default function ExplorePage() {
               {featuredEvents.map((event) => (
                 <CarouselItem key={event._id}>
                   <div
-                    className="relative h-[400px] rounded-xl overflow-hidden cursor-pointer"
+                    className="relative h-[clamp(260px,40vw,380px)] rounded-[22px] overflow-hidden cursor-pointer"
                     onClick={() => handleEventClick(event.slug)}
                   >
                     {event.coverImage ? (
@@ -129,12 +131,12 @@ export default function ExplorePage() {
                         style={{ backgroundColor: event.themeColor }}
                       />
                     )}
-                    <div className="absolute inset-0 bg-linear-to-r from-black/60 to-black/30" />
+                    <div className="absolute inset-0 bg-linear-to-b from-transparent via-black/10 to-black/80" />
                     <div className="relative h-full flex flex-col justify-end p-8 md:p-12">
-                      <Badge className="w-fit mb-4" variant="secondary">
+                      <Badge className="w-fit mb-4 bg-white/20 text-white backdrop-blur" variant="secondary">
                         {event.city}, {event.state || event.country}
                       </Badge>
-                      <h2 className="text-xl sm:text-3xl md:text-5xl font-bold mb-3 text-white">
+                      <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 text-white tracking-tight leading-tight">
                         {event.title}
                       </h2>
                       <p className="text-base sm:text-lg text-white/90 mb-4 max-w-2xl line-clamp-2">
@@ -163,25 +165,25 @@ export default function ExplorePage() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="left-4" />
-            <CarouselNext className="right-4" />
+            <CarouselPrevious className="left-6 size-11 bg-black/40 border-white/40 text-white hover:bg-black/60" />
+            <CarouselNext className="right-6 size-11 bg-black/40 border-white/40 text-white hover:bg-black/60" />
           </Carousel>
         </div>
       )}
 
       {/* Local Events */}
       {localEvents && localEvents.length > 0 && (
-        <div className="mb-16">
+        <div className="mb-16 px-4 sm:px-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-3xl font-bold mb-1">Events Near You</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1">Events near you</h2>
               <p className="text-muted-foreground">
                 Happening in {currentUser?.location?.city || "your area"}
               </p>
             </div>
             <Button
               variant="outline"
-              className="gap-2"
+              className="gap-2 h-11"
               onClick={handleViewLocalEvents}
             >
               View All <ArrowRight className="w-4 h-4" />
@@ -202,48 +204,34 @@ export default function ExplorePage() {
       )}
 
       {/* Browse by Category */}
-
-      <div className="mb-20">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-8 tracking-tight">
-          Browse by Category
+      <div className="mb-16 px-4 sm:px-6">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-5">
+          Browse by category
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="flex flex-wrap gap-2.5">
           {categoriesWithCounts.map((category) => (
-            <Card
+            <button
               key={category.id}
+              type="button"
               onClick={() => handleCategoryClick(category.id)}
-              className="p-0 bg-linear-to-br from-background to-muted/30 group cursor-pointer rounded-xl border border-border/60 bg-background transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-purple-500/50 active:scale-[0.98]"
+              className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border bg-card px-4 text-sm font-medium transition-colors hover:border-brand/50 hover:bg-brand-soft"
             >
-              <CardContent className="p-4 sm:p-6 flex items-center gap-4">
-                {/* Icon */}
-                <div className="flex items-center justify-center size-12 sm:h-14 sm:w-14 rounded-lg bg-purple-500/10 text-2xl sm:text-3xl group-hover:bg-purple-500/20 transition-colors">
-                  {category.icon}
-                </div>
-
-                {/* Text */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm sm:text-base font-semibold truncate group-hover:text-purple-400 transition-colors">
-                    {category.label}
-                  </h3>
-
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="text-xs sm:text-sm text-muted-foreground">
-                      {category.count} Event{category.count !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              <span aria-hidden="true">{category.icon}</span>
+              {category.label}
+              <span className="font-mono text-xs text-muted-foreground">
+                {category.count}
+              </span>
+            </button>
           ))}
         </div>
       </div>
 
       {/* Popular Events Across Country */}
       {popularEvents && popularEvents.length > 0 && (
-        <div className="mb-16">
+        <div className="mb-16 px-4 sm:px-6">
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-1">Popular Across India</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1">Popular across India</h2>
             <p className="text-muted-foreground">Trending events nationwide</p>
           </div>
 

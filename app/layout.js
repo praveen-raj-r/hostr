@@ -1,11 +1,23 @@
+import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import MobileTabBar from "@/components/mobile-tab-bar";
 import { ConvexClientProvider } from "../components/convex-client-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import { dark } from "@clerk/themes";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata = {
   title: "Hostr - AI Event Management Platform",
@@ -18,31 +30,33 @@ export default function RootLayout({ children }) {
     <ClerkProvider
       appearance={{
         theme: dark,
+        variables: {
+          colorPrimary: "#b18cff",
+          colorBackground: "#15151c",
+          colorInputBackground: "#0b0b0f",
+          borderRadius: "0.625rem",
+          fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
+        },
       }}
     >
       <html lang="en" suppressHydrationWarning>
-        <body className="bg-linear-to-br from-gray-950 via-zinc-900 to-stone-900 text-white">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground font-sans antialiased`}
+        >
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
-            enableSystem
+            forcedTheme="dark"
+            enableSystem={false}
             disableTransitionOnChange
           >
             <ConvexClientProvider>
-              <div>
-                <Header />
-                <main className="relative min-h-screen container mx-auto pt-50 md:pt-32">
-                  {/* Background glow effects (behind everything) */}
-                  <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl" />
-                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-600/20 rounded-full blur-3xl" />
-                  </div>
-
-                  {/* Page content (above glow) */}
-                  <div className="relative z-10">{children}</div>
-                </main>
-                <Footer />
-              </div>{" "}
+              <Header />
+              <main className="relative min-h-screen container mx-auto pt-8 pb-24 md:pb-8">
+                {children}
+              </main>
+              <Footer />
+              <MobileTabBar />
               <Toaster position="top-center" richColors />
             </ConvexClientProvider>
           </ThemeProvider>

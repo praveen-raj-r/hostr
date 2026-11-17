@@ -21,7 +21,7 @@ const links = [
 
 const Footer = () => {
   return (
-    <footer className="border-t border-white/10 bg-background">
+    <footer className="border-t bg-background mt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-6">
           {/* Left */}
@@ -44,7 +44,7 @@ const Footer = () => {
                 }
                 aria-label={label}
                 title={label}
-                className=" group inline-flex items-center justify-center h-10 w-10 rounded-full border border-white/10 bg-white/5 text-muted-foreground transition-all duration-300 hover:text-white hover:bg-purple-500/15 hover:border-purple-500/40 hover:-translate-y-0.5 active:scale-95"
+                className="group inline-flex items-center justify-center size-11 rounded-full border bg-card text-muted-foreground transition-all duration-200 hover:text-foreground hover:bg-brand-soft hover:border-brand/40 hover:-translate-y-0.5 active:scale-95"
               >
                 <Icon className="h-5 w-5 transition-transform group-hover:scale-110" />
               </a>
