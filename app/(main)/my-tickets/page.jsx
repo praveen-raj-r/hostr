@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 import EventCard from "@/components/event-card";
+import ConfirmDialog from "@/components/confirm-dialog";
 
 export default function MyTicketsPage() {
   const router = useRouter();
@@ -36,10 +37,10 @@ export default function MyTicketsPage() {
   const { mutate: cancelRegistration, isLoading: isCancelling } =
     useConvexMutation(api.registrations.cancelRegistration);
 
-  const handleCancelRegistration = async (registrationId) => {
-    if (!window.confirm("Are you sure you want to cancel this registration?"))
-      return;
+  // Id of the registration awaiting cancel confirmation (null = closed).
+  const [pendingCancelId, setPendingCancelId] = useState(null);
 
+  const handleCancelRegistration = async (registrationId) => {
     try {
       await cancelRegistration({ registrationId });
       toast.success("Registration cancelled successfully.");
@@ -87,7 +88,7 @@ export default function MyTicketsPage() {
                   event={registration.event}
                   action="ticket"
                   onClick={() => setSelectedTicket(registration)}
-                  onDelete={() => handleCancelRegistration(registration._id)}
+                  onDelete={() => setPendingCancelId(registration._id)}
                 />
               ))}
             </div>
@@ -188,6 +189,16 @@ export default function MyTicketsPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      <ConfirmDialog
+        open={pendingCancelId !== null}
+        onOpenChange={(open) => !open && setPendingCancelId(null)}
+        title="Cancel this ticket?"
+        description="Your spot will be released for someone else. You can register again if spots remain."
+        confirmLabel="Cancel ticket"
+        cancelLabel="Keep ticket"
+        onConfirm={() => handleCancelRegistration(pendingCancelId)}
+      />
     </div>
   );
 }

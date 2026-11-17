@@ -32,6 +32,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { getCategoryIcon, getCategoryLabel } from "@/lib/data";
 import QRScannerModal from "../_components/qr-scanner-modal";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { AttendeeCard } from "../_components/attendee-card";
 
 export default function EventDashboardPage() {
@@ -66,13 +67,9 @@ export default function EventDashboardPage() {
     api.events.deleteEvent
   );
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const handleDelete = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this event? This action cannot be undone and will permanently delete the event and all associated registrations."
-    );
-
-    if (!confirmed) return;
-
     // Skip the dashboard/registrations queries *before* the mutation runs,
     // not after it resolves. Both are live Convex subscriptions on this
     // eventId — once the event is gone server-side, they'd otherwise react
@@ -244,7 +241,7 @@ export default function EventDashboardPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleDelete}
+              onClick={() => setShowDeleteConfirm(true)}
               disabled={isDeleting}
               className="text-red-500 hover:text-red-600 gap-2 flex-1"
             >
@@ -380,6 +377,17 @@ export default function EventDashboardPage() {
           onClose={() => setShowQRScanner(false)}
         />
       )}
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete this event?"
+        description="This can't be undone. The event and all of its registrations will be permanently deleted."
+        confirmLabel="Delete event"
+        cancelLabel="Keep event"
+        requireText="DELETE"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

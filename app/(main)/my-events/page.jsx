@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -10,6 +11,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import EventCard from "@/components/event-card";
+import ConfirmDialog from "@/components/confirm-dialog";
 
 export default function MyEventsPage() {
   const router = useRouter();
@@ -17,13 +19,10 @@ export default function MyEventsPage() {
   const { data: events, isLoading } = useConvexQuery(api.events.getMyEvents);
   const { mutate: deleteEvent } = useConvexMutation(api.events.deleteEvent);
 
+  // Id of the event awaiting delete confirmation (null = dialog closed).
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+
   const handleDelete = async (eventId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this event? This action cannot be undone and will permanently delete the event and all associated registrations."
-    );
-
-    if (!confirmed) return;
-
     try {
       await deleteEvent({ eventId });
       toast.success("Event deleted successfully");
@@ -79,12 +78,23 @@ export default function MyEventsPage() {
                 event={event}
                 action="event"
                 onClick={() => handleEventClick(event._id)}
-                onDelete={handleDelete}
+                onDelete={(eventId) => setPendingDeleteId(eventId)}
               />
             ))}
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(open) => !open && setPendingDeleteId(null)}
+        title="Delete this event?"
+        description="This can't be undone. The event and all of its registrations will be permanently deleted."
+        confirmLabel="Delete event"
+        cancelLabel="Keep event"
+        requireText="DELETE"
+        onConfirm={() => handleDelete(pendingDeleteId)}
+      />
     </div>
   );
 }
