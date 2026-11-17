@@ -241,7 +241,7 @@ export default function CreateEventPage() {
   };
   return (
     <div
-      className="min-h-screen transition-colors duration-300 px-6 py-8 -mt-6 md:-mt-16 lg:-mt-5 lg:rounded-md"
+      className="min-h-screen transition-colors duration-300 px-4 sm:px-6 py-8 mx-4 sm:mx-6 rounded-3xl"
       style={{ backgroundColor: themeColor }}
     >
       {/* Header */}

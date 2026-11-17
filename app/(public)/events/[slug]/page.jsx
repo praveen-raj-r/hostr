@@ -114,9 +114,9 @@ export default function EventDetailPage() {
       style={{
         backgroundColor: event.themeColor || "#1e3a8a",
       }}
-      className="min-h-screen py-8 -mt-6 md:-mt-16 lg:-mx-5"
+      className="min-h-screen py-8 mx-4 sm:mx-6 rounded-3xl"
     >
-      <div className="max-w-7xl mx-auto px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8">
         {/* Event Title & Info */}
         <div className="mb-8">
           <Badge variant="secondary" className="mb-3">
