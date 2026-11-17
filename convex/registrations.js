@@ -93,7 +93,18 @@ export const registerForEvent = mutation({
 export const checkRegistration = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    // Used on the public event page, so a signed-out visitor (or a user whose
+    // row hasn't been created yet) is "not registered", not an error.
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .unique();
+    if (!user) return null;
 
     const registration = await ctx.db
       .query("registrations")
