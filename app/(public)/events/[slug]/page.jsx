@@ -57,7 +57,7 @@ export default function EventDetailPage() {
   // Check if user is already registered
   const { data: registration } = useConvexQuery(
     api.registrations.checkRegistration,
-    event?._id ? { eventId: event._id } : "skip"
+    event?._id ? { eventId: event._id } : "skip",
   );
 
   // Current user's own Convex record (needed to check organizer ownership —
@@ -151,9 +151,9 @@ export default function EventDetailPage() {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-[1fr_380px] gap-8">
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-8">
           {/* Main Content */}
-          <div className="space-y-8">
+          <div className="space-y-8 min-w-0">
             {/* Description */}
             <Card
               className={"pt-0"}
@@ -191,7 +191,7 @@ export default function EventDetailPage() {
                     {event.city}, {event.state || event.country}
                   </p>
                   {event.address && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground wrap-break-word">
                       {event.address}
                     </p>
                   )}
